@@ -442,6 +442,7 @@ uintxx_t MoToStepper::setSpeedSteps( uintxx_t speed10 ) { //####################
     #else
     long rtmp = (long)speed10*_lastRampLen/_lastRampSpeed;
     #endif
+    if ( rtmp > MAXRAMPLEN ) rtmp = MAXRAMPLEN; // -rtmp-1 must fit into intxx_t ( int16_t on 8-bit MCUs )
     //DB_PRINT(">>>>>>>>>>>sSS:(%u) nRl=%ld", (unsigned int)speed10, rtmp );
     return setSpeedSteps( speed10,  -rtmp-1 );
 }
