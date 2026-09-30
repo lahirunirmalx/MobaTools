@@ -434,7 +434,7 @@ void IRAM_ATTR stepperISR(nextCycle_t cyclesLastIRQ) {
 			// if no enablepin is defined, the steppattern must be set to the last active pattern.
 			if ( stepperDataP->enablePin == NO_ENABLEPIN ) {
 				// set motorwires to last pattern ( as it was when disabling the outputs )
-				spiChanged = setStepperPins( stepperDataP, stepPattern[ stepperDataP->patternIx ] );
+				spiChanged |= setStepperPins( stepperDataP, stepPattern[ stepperDataP->patternIx ] ); // don't clear a flag set by another stepper
 			}
 			else {
 				// set enablePin to active
@@ -459,7 +459,7 @@ void IRAM_ATTR stepperISR(nextCycle_t cyclesLastIRQ) {
                 stepperDataP->cycCnt = 0;
 				if ( stepperDataP->enablePin == NO_ENABLEPIN ) {
 					// set motorwires to 0 to disable the motor
-					spiChanged = setStepperPins( stepperDataP, 0 );
+					spiChanged |= setStepperPins( stepperDataP, 0 ); // don't clear a flag set by another stepper
 				} 
 				else {
 					// set enablePin to inactive
