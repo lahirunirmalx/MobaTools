@@ -86,7 +86,7 @@ void seizeTimerAS() {
         //TCA0.SINGLE.CTRLFCLR                              / wasn't used in megaavr code - not sure what it would do here
         //TCA0.SINGLE.CTRLFSET                              // wasn't used in megaavr code - not sure what it would do here
         //TCA0.SINGLE.INTCTRL = TCA_SINGLE_CMP0_bm | TCA_SINGLE_CMP1_bm; // enable cmp0 and cmp1 interrupt
-        TCA0.SINGLE.INTFLAGS = 0;   // clear all interrupts
+        TCA0.SINGLE.INTFLAGS = TCA_SINGLE_OVF_bm | TCA_SINGLE_CMP0_bm | TCA_SINGLE_CMP1_bm | TCA_SINGLE_CMP2_bm;   // clear all interrupt flags ( write 1 to clear )
         //TCA0_SINGLE_PER  = TIMERPERIODE * TICS_PER_MICROSECOND;  // timer periode is 20000us V3.0: its now max (0xFFFF)
         TCA0_SINGLE_PER  = 0xFFFF;  // V3.0: its now max (0xFFFF)
         TCA0.SINGLE.CMP0 = FIRST_PULSE;

@@ -82,7 +82,7 @@ void seizeTimerAS() {
         //TCA0_SINGLE_CTRLFCLR
         //TCA0_SINGLE_CTRLFSET
         //TCA0_SINGLE_INTCTRL = TCA_SINGLE_CMP0_bm | TCA_SINGLE_CMP1_bm; // enable cmp0 and cmp1 interrupt
-        TCA0_SINGLE_INTFLAGS = 0;   // clear all interrupts
+        TCA0_SINGLE_INTFLAGS = TCA_SINGLE_OVF_bm | TCA_SINGLE_CMP0_bm | TCA_SINGLE_CMP1_bm | TCA_SINGLE_CMP2_bm;   // clear all interrupt flags ( write 1 to clear )
         //TCA0_SINGLE_PER  = TIMERPERIODE * TICS_PER_MICROSECOND;  // timer periode is 20000us V3.0: its now max (0xFFFF)
         TCA0_SINGLE_PER  = 0xFFFF;  // V3.0: its now max (0xFFFF)
         TCA0_SINGLE_CMP0 = FIRST_PULSE;   
