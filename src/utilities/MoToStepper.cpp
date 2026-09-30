@@ -327,7 +327,16 @@ void MoToStepper::detach() {   // no more moving, detach from output############
         break;
       #endif
       default:
-        ;   // no action with SPI Outputs
+        #ifndef NO_SPISTEPPER
+        if ( _stepperData.output >= SPI_1 ) {
+            // SPI output: switch the coils off and release the SPI position, so it can be attached again
+            _noStepIRQ();
+            if ( setStepperPins( &_stepperData, 0 ) && spiInitialized ) startSpiWriteAS( spiStepperData );
+            MoToStepper::outputsUsed.outputs &= ~(1<<(_stepperData.output-SPI_1));
+            _stepIRQ();
+        }
+        #endif
+        ;
     }
     _stepperData.output = NO_OUTPUT;
     _stepperData.rampState = rampStat::STOPPED;
