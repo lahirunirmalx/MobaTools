@@ -97,7 +97,7 @@ extern uint8_t spiByteCount;
 
 #ifdef SPCR
 // use an ISR only if we have a 'real' SPI Hardware
-volatile byte received; // Dummy to clear SPIF
+static volatile byte received; // Dummy to clear SPIF ( static: must not clash with sketch globals )
 ISR ( SPI_STC_vect ) { 
 #ifdef  ARDUINO_AVR_LARDU_328E // ISR for LGT8Fx
     SET_TP4;
