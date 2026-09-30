@@ -570,7 +570,18 @@ uintxx_t MoToStepper::setSpeedSteps( uintxx_t speed10, intxx_t rampLen ) {
     // compute target steplength and check whether speed and ramp fit together: 
 	#ifdef IS_32BIT
         tCycSteps = ( 1000000L * 10  / newSpeed10 );
-        newCyctXramplen = tCycSteps * ( newRampLen + RAMPOFFSET );
+        // tCycSteps * (ramplen+RAMPOFFSET) must fit into cycles_t (int32), otherwise ramplen is adjusted
+        // accordingly ( same as the 65000 limit on 8-bit MCUs ). Half of INT32_MAX leaves headroom for
+        // the jitter arithmetic in the ISR.
+        constexpr uint32_t MAX_CYCXRAMPLEN = 0x40000000UL;
+        uint64_t cycXramp = (uint64_t)tCycSteps * ( newRampLen + RAMPOFFSET );
+        if ( cycXramp > MAX_CYCXRAMPLEN ) {
+            // adjust ramplen
+            newRampLen = MAX_CYCXRAMPLEN / tCycSteps;
+            if( newRampLen > RAMPOFFSET ) newRampLen -= RAMPOFFSET; else newRampLen = 0;
+            cycXramp = (uint64_t)tCycSteps * ( newRampLen + RAMPOFFSET );
+        }
+        newCyctXramplen = cycXramp;
 	#else
         tMicroSteps = ( 1000000L * 10  / newSpeed10 );
         tCycSteps = tMicroSteps / CYCLETIME; 
