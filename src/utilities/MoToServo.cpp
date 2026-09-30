@@ -466,7 +466,7 @@ void MoToServo::write(uint16_t angleArg)
     // values between 0 and 180 are interpreted as degrees,
     // values between MINPULSEWIDTH and MAXPULSEWIDTH are interpreted as microseconds
     //DB_PRINT( "write1: Soll=%d, Ist=%d, Ix=%d, inc=%d, SR=%d, Duty100=%d, LEDC_BITS=%d", _servoData.soll,_servoData.ist, _servoData.servoIx, _servoData.inc, INC_PER_TIC, DUTY100, LEDC_BITS );
-    static servoPos_t newpos;
+    servoPos_t newpos;  // must not be static: write() may be called for several servos ( and from different contexts )
     bool startPulse = false;    // only for esp8266
     //SET_TP1;
     #ifdef ARDUINO_ARCH_AVR
