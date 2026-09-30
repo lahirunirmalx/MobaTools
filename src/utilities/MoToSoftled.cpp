@@ -72,6 +72,7 @@ void softledISR(nextCycle_t cyclesLastIRQ) { // uint8 for AVR, uint32 for 32-Bit
                   case DECBULB:
                   case DECLIN:
                     // led with falling brightness
+                    noInterrupts(); // read-modify-write on the port, interrupts are enabled here
                     if (ledDataP->invFlg  ) {
                         #ifdef FAST_PORTWRT
                         *ledDataP->portPin.Adr &= ~ledDataP->portPin.Mask;
@@ -85,6 +86,7 @@ void softledISR(nextCycle_t cyclesLastIRQ) { // uint8 for AVR, uint32 for 32-Bit
                         digitalWrite( ledDataP->pin, HIGH );
                         #endif
                     }
+                    interrupts();
                     // set off-time 
                     if ( ledNextCyc > ledDataP->aCycle ) ledNextCyc = ledDataP->aCycle;
                     ledDataP->actPulse = true;
@@ -103,6 +105,7 @@ void softledISR(nextCycle_t cyclesLastIRQ) { // uint8 for AVR, uint32 for 32-Bit
                         uint8_t tmpIx;
                         // End of ON-time is reached
                         SET_TP4;
+                        noInterrupts(); // read-modify-write on the port, interrupts are enabled here
                         if (ledDataP->invFlg  ) {
                             #ifdef FAST_PORTWRT
                             *ledDataP->portPin.Adr |= ledDataP->portPin.Mask;
@@ -116,6 +119,7 @@ void softledISR(nextCycle_t cyclesLastIRQ) { // uint8 for AVR, uint32 for 32-Bit
                             digitalWrite( ledDataP->pin, LOW );
                             #endif
                         }
+                        interrupts();
                         CLR_TP4;
                         ledDataP->actPulse = false; // Led pulse is LOW now
                         // determine length of next PWM Cyle
