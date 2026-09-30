@@ -306,10 +306,22 @@ void MoToStepper::detach() {   // no more moving, detach from output############
       case SINGLE_PINS4:
         nPins+=2;           // we have 2 more pins in Mode SINGLE_PINS4 compared to A4988Pins (  fallthrough to next case )
         [[fallthrough]];    // supress warning
-      case STEPDIR_PINS:
+      case SINGLE_PINS2:    // only pins 0/1
+      case STEPDIR_PINS:    // only pins 0/1
         for ( byte i=0; i<nPins; i++ ) {
+            #if defined ARDUINO_ARCH_MEGAAVR
+            // megaAVR / megaTinyAVR: .Adr points to PORTx.OUT. Use the write-1-to-clear registers of the
+            // port structure. ( PORTx.OUT-1 is DIRTGL here, a read-modify-write on it toggles other pins )
+            PORT_t *port = (PORT_t *)( (uint8_t *)_stepperData.portPins[i].Adr - offsetof( PORT_t, OUT ) );
+            port->DIRCLR = _stepperData.portPins[i].Mask;   // pin to input
+            port->OUTCLR = _stepperData.portPins[i].Mask;   // no pullup
+            #else
+            // classic AVR: .Adr points to PORTx, DDRx is the register directly below it
+            noInterrupts(); // read-modify-write, other ISRs may write to the same port
             *(_stepperData.portPins[i].Adr-1) &= ~_stepperData.portPins[i].Mask;
             *(_stepperData.portPins[i].Adr) &= ~_stepperData.portPins[i].Mask;
+            interrupts();
+            #endif
         }
         break;
       #else
