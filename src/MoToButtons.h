@@ -112,9 +112,7 @@ class MoToButtons {
       _pinCnt = buttonCnt;
       _pinArray = pinNumbers;
       _getHWbuttons = NULL;
-      _debTime = debTime;
-      _pressTime = pressTime / debTime;   // in debTime tics
-      _dClickTime = doubleClick / debTime;
+      _initTimes( debTime, pressTime, doubleClick );
       // Set Pins to INPUT_PULLUP
       // now done in processButtons on first call. It doesn't work here on STM32F4
       //for ( byte i= 0; i < _pinCnt; i++ ) pinMode( pinNumbers[i], INPUT_PULLUP );
@@ -123,9 +121,7 @@ class MoToButtons {
     
     MoToButtons( button_t (*getHWbuttons)(), uint8_t debTime, uint16_t pressTime, uint16_t doubleClick = (400 ) ) {
       _getHWbuttons = getHWbuttons;
-      _debTime = debTime;
-      _pressTime = pressTime / debTime;   // in debTime tics
-      _dClickTime = doubleClick / debTime;
+      _initTimes( debTime, pressTime, doubleClick );
       _initLocals( );
     }
     
@@ -317,6 +313,16 @@ class MoToButtons {
       return buttonTemp;
     }
     
+    void _initTimes( uint8_t debTime, uint16_t pressTime, uint16_t doubleClick ) {
+      // all times are stored in debounce tics ( max 255 )
+      if ( debTime == 0 ) debTime = 1;    // avoid division by zero
+      _debTime = debTime;
+      uint16_t tics = pressTime / debTime;
+      _pressTime = tics > 255 ? 255 : tics;
+      tics = doubleClick / debTime;
+      _dClickTime = tics > 255 ? 255 : tics;
+    }
+
     void _initLocals() {
       _lastReadTime = 0;     // Last time HW state was read
       _clickTime = _dClickTime/2;
@@ -328,6 +334,8 @@ class MoToButtons {
       _shortPress = 0;
       _leadingEdge = 0;
       _trailingEdge = 0;
+      _noDoubleClick = 0;
+      _clicked = 0;
       for ( byte i = 0; i < _buttonCnt; i++ ) {
         _buttonTime[ i ] = 0; // Time in debounce tics
       }
