@@ -89,9 +89,10 @@ void seizeTimerAS() {
 		MtcP->CTRLA.reg |= TC_CTRLA_PRESCSYNC_PRESC; // clear timer count on prescaler clock
 		while (MtcP->STATUS.bit.SYNCBUSY == 1) ;
 
-		// Enable InterruptVector
+		// Enable InterruptVector with low priority ( IRQ_PRIO, see drivers.h ). The ISR may run long
+		// ( steppers, softleds, servos, SPI transfer ) and must not delay USB, UART or WiFi interrupts.
+		NVIC_SetPriority(TCx_IRQn,IRQ_PRIO);
 		NVIC_EnableIRQ(TCx_IRQn);
-		NVIC_SetPriority(TCx_IRQn,0);
 
 		// Enable TC
 		MtcP->CTRLA.reg |= TC_CTRLA_ENABLE;
