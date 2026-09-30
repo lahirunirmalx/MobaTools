@@ -129,7 +129,10 @@ int startWaveformMoTo(uint8_t pin, uint32_t timeHighUS, uint32_t timeLowUS, uint
   if (!(waveformEnabled & mask)) {
     // Actually set the pin high or low in the IRQ service to guarantee times
     wave->nextServiceCycle = GetCycleCount() + microsecondsToClockCycles(1);
+    // read-modify-write: startWaveformISR() may set other bits from an ISR in between
+    uint32_t savedPS = xt_rsil(15);
     waveformToEnable |= mask;
+    xt_wsr_ps(savedPS);
     if (!timerRunning) {
       initTimer();
       timer1_write(microsecondsToClockCycles(10));
@@ -211,7 +214,10 @@ int ICACHE_RAM_ATTR stopWaveformMoTo(uint8_t pin) {
   if (!(waveformEnabled & mask)) {
     return false; // It's not running, nothing to do here
   }
+  // read-modify-write: may be called from main code and from ISRs
+  uint32_t savedPS = xt_rsil(15);
   waveformToDisable |= mask;
+  xt_wsr_ps(savedPS);
   // Ensure timely service....
   if (T1L > microsecondsToClockCycles(10)) {
     timer1_write(microsecondsToClockCycles(10));
