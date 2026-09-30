@@ -27,7 +27,7 @@ inline __attribute__((__always_inline__)) void _noStepIRQ() {
   //SET_TP3;
 #endif
 }
-inline __attribute__((__always_inline__)) void  _stepIRQ(bool force = true) {
+inline __attribute__((__always_inline__)) void  _stepIRQ(bool force = false) {  // default must be 'false' ( nested disable/enable ), like on the other MCUs
   //enable stepper IRQ id disable counter is 0
   if ( force ) noStepISR_Cnt = 1;              //enable IRQ immediately
   if ( noStepISR_Cnt > 0 ) noStepISR_Cnt -= 1; // don't decrease if already 0 ( if enabling IRQ is called too often )
