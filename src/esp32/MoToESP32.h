@@ -32,6 +32,7 @@ inline __attribute__((__always_inline__)) void  _stepIRQ(bool force = true) {
 static inline __attribute__((__always_inline__)) int8_t servoPwmSetup( servoData_t *servoDataP ) {
     //DB_PRINT("Search fre ledc channel");
     int8_t pwmNbr = initPwmChannel( servoDataP->pin, SERVO_TIMER );
+    if ( pwmNbr < 0 ) return pwmNbr;  // no free ledc channel: don't attach the ISR ( it would use pwmUse[-1] )
     pinMode( servoDataP->pin, OUTPUT );
     attachInterruptArg( servoDataP->pin, ISR_Servo, (void*)servoDataP, FALLING );
     DB_PRINT( "PwmNbr:%d, Pin:%d, Group=%d, Channel=%d, Timer=%d", pwmNbr, pwmUse[pwmNbr].pin, pwmUse[pwmNbr].group, pwmUse[pwmNbr].channel, pwmUse[pwmNbr].timer );
@@ -71,7 +72,7 @@ static inline __attribute__((__always_inline__)) int8_t softLedPwmSetupAS( servo
     return pwmNbr;
 }
 
-static inline __attribute__((__always_inline__)) uint8_t attachSoftledAS( ledData_t *ledDataP ) {
+static inline __attribute__((__always_inline__)) int8_t attachSoftledAS( ledData_t *ledDataP ) {  // -1 if no channel is free
     int8_t pwmNbr = initPwmChannel( ledDataP->pin, LED_TIMER );
     if ( pwmNbr >= 0 ) {
         // freien LEDC-Slot gefunden, Pin und Interrupt einrichten
