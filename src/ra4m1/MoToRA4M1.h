@@ -140,7 +140,6 @@ static inline __attribute__((__always_inline__)) void enableStepperIsrAS() {
     // IRQ not yet initialzed
     IRQManager::getInstance().addTimerCompareCaptureA(timerIrqCfg, &ISR_Stepper);
     IRQnStepper = MoToGPT.ext_cfg.capture_a_irq;   // NVIC IRQ-number overflow ISR
-    printf("IRQnStepper=%d",(uint8_t)IRQnStepper);
     NVIC_SetPriority(IRQnStepper,NVIC_StepperPrio);
     NVIC_EnableIRQ(IRQnStepper);
 
