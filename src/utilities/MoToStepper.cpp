@@ -111,6 +111,32 @@ void MoToStepper::initialize ( long steps360, uint8_t mode ) {
     _stepperData.stepActive = 0;					// only > 0 in STEPDIR while steppulse is active
 	_stepperData.enableOn = false;					// default if enable not active
     _stepperData.nextStepperDataP = NULL;
+    // The remaining ISR data and object members must be initialised explicitly too. Otherwise only
+    // global objects ( which are zero-initialised ) work, objects on the stack or heap start with
+    // random values ( e.g. speedZero == ZEROSPEEDACTIVE would inhibit stepping ).
+    _stepperData.syncDataP = NULL;
+    _stepperData.stepCnt2 = 0;
+    _stepperData.speedZero = NORMALSPEED;
+    _stepperData.stepsInRamp = 0;
+    _stepperData.deltaSteps = 1;
+    _stepperData.cyctXramplen = 0;
+    _stepperData.cycDelay = 0;
+    _stepperData.lastPattern = 0;
+    _stepperData.invFlg = 0;
+    _stepperData.enable = false;
+    #ifdef ESP8266
+    _stepperData.dirChange = false;
+    #else
+    _stepperData.cycCnt = 0;
+    #ifndef IS_32BIT
+    _stepperData.aCycRemain = 0;
+    #endif
+    #endif
+    _stepSpeed10 = DEF_SPEEDSTEPS;
+    _lastRampLen = DEF_RAMP;
+    _lastRampSpeed = DEF_SPEEDSTEPS;
+    stepsToMove = 0;
+    lastSFZ = 0;
 	#ifndef ESP8266
     // add at end of chain
     stepperData_t **tmpPP = &stepperRootP;
