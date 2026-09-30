@@ -109,7 +109,9 @@ class MoToTimer
   public:
     MoToTimer(unsigned long firstTime = 0) {
         active = firstTime>0? RUNNING | NOTEXPIRED : 0;
-        startTime = 0;
+        // millis() is still 0 for global objects ( constructed before the core is initialised ),
+        // for objects created later this is the real start time
+        startTime = firstTime>0? millis() : 0;
         runTime = firstTime;
     }
 
