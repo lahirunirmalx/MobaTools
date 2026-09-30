@@ -144,7 +144,9 @@ extern uint8_t bitSS;;
     // only an USI HW is available
     
     //#warning "USI in 3wire-Mode ist used"
-    static inline __attribute__((__always_inline__)) void initSpiAS() {
+    static inline __attribute__((__always_inline__)) void initSpiAS(byte ssPin = SS, byte clkPin = 255, byte mosiPin = 255 ) {
+        // same signature as the SPI-HW variant ( SET_SPI_PINS ), but only the SS-Pin can be set
+        (void)clkPin; (void)mosiPin; // to supress warning about unused parameters
         if ( spiInitialized ) return;
         // set OutputPins MISO ( =DO )
         USI_SCK_PORT |= _BV(USCK_DD_PIN);   //set the USCK pin as output
@@ -154,9 +156,9 @@ extern uint8_t bitSS;;
         USICR = 0;  //reset
         // set to 3-wire ( =SPI ) mode0,  Clock by USITC-bit, positive edge
         USICR = _BV(USIWM0) | _BV(USICS1) | _BV(USICLK);
-        portSS = portOutputRegister(digitalPinToPort(SS));
-        bitSS = digitalPinToBitMask(SS);
-        pinMode( SS, OUTPUT );
+        portSS = portOutputRegister(digitalPinToPort(ssPin));
+        bitSS = digitalPinToBitMask(ssPin);
+        pinMode( ssPin, OUTPUT );
         SET_SS; //digitalWrite( SS, HIGH );
         spiInitialized = true;  
     }
