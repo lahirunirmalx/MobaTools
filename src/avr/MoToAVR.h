@@ -63,6 +63,10 @@ extern volatile uint8_t *portSS;
 extern uint8_t bitSS;;
 #define SET_SS *portSS |= bitSS 
 #define CLR_SS *portSS &= ~bitSS 
+// SET_SS/CLR_SS are read-modify-write sequences on a port register. Other ISRs ( e.g. servo ) may write
+// to the same port, so these variants are used where interrupts may be enabled ( stepper ISR runs nested ).
+#define SET_SS_ATOMIC { uint8_t _sreg = SREG; cli(); SET_SS; SREG = _sreg; }
+#define CLR_SS_ATOMIC { uint8_t _sreg = SREG; cli(); CLR_SS; SREG = _sreg; }
 #if defined COMPILING_MOTOSTEPPER_CPP
     static uint8_t spiInitialized = false;
     // Macros für fast setting of SS Port
@@ -127,7 +131,7 @@ extern uint8_t bitSS;;
 
     static inline __attribute__((__always_inline__)) void startSpiWriteAS( uint8_t spiData[] ) {
         //digitalWrite( SS, LOW );
-        CLR_SS;
+        CLR_SS_ATOMIC;
         spiByteCount = 0;
         SPDR = spiData[1];
 	#ifdef  ARDUINO_AVR_LARDU_328E // ISR for LGT8Fx
@@ -164,7 +168,7 @@ extern uint8_t bitSS;;
     
     static inline __attribute__((__always_inline__)) void startSpiWriteAS( uint8_t spiData[] ) {
         //SET_TP4;
-        CLR_SS;
+        CLR_SS_ATOMIC;
         USIDR = spiData[1];
         #ifdef FASTSPI  // SPI mit syclk/2
         uint8_t usicrTemp = USICR | _BV(USITC);
@@ -236,7 +240,7 @@ extern uint8_t bitSS;;
         USICR |= _BV(USITC);        
         USICR |= _BV(USITC);   
         #endif
-        SET_SS;
+        SET_SS_ATOMIC;
         CLR_TP4;
     }    
     
