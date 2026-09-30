@@ -341,7 +341,7 @@ void MoToStepper::detach() {   // no more moving, detach from output############
 			if ( _stepperData.enablePin != NO_ENABLEPIN ) {
 				pinMode( _stepperData.enablePin, INPUT );
 				clrGpio(_stepperData.enablePin);    // mark pin as unused
-				detachInterrupt( _stepperData.enablePin);
+				detachInterrupt( _stepperData.pins[1]);  // enable-ISR was attached to the dir pin ( see attachEnable )
 			}
             _stepperData.enablePin = NO_STEPPER_ENABLE;
 			_stepperData.enableOn = false;
