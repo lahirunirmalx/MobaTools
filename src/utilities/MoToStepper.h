@@ -183,7 +183,9 @@ typedef union { // used output channels as bit and uint8_t
       uint8_t outputs;
     
 } outUsed_t;
+#ifndef NO_SPISTEPPER
 constexpr uint8_t spi34UsedMsk = (1<<(SPI_3-SPI_1)) | (1<<(SPI_4-SPI_1));  //=0x0C;	// Bitmask to check if SPI_3 or SPI_4 is used
+#endif
 
 extern stepperData_t *stepperRootP; // Start aller verketteten Stepper ( wird auch in MoToSyncStepper benötigt )
 //////////////////////////////////////////////////////////////////////////////
@@ -266,7 +268,9 @@ class MoToStepper
     long readSteps();               // actual distance to zeropoint in steps
     uint8_t attached();
     void prDynData();             // print actual Stepperdata
+	#ifndef NO_SPISTEPPER
 	static bool spi34Used()			{ return ( MoToStepper::outputsUsed.outputs & spi34UsedMsk ); }
+	#endif
     
     //some AccelStepper compatible method names ( may be sligtly different in functionality
     void moveTo ( long stepPos )    { writeSteps( stepPos ); }

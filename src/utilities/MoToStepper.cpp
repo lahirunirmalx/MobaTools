@@ -286,7 +286,9 @@ uint8_t MoToStepper::attach( outArg_t outArg, byte pins[] ) {
         enableStepperIsrAS();
 		DB_PRINT("Defaults setzen");
         setSpeedSteps( DEF_SPEEDSTEPS, DEF_RAMP );
+		#ifndef NO_SPISTEPPER
 		DB_PRINT("spi34UsedMsk = %02X, ",spi34UsedMsk);
+		#endif
     }
     DB_PRINT( "attach: output=%d, attachOK=%d", _stepperData.output, attachOK );
     //Serial.print( "Attach Stepper, Ix= "); Serial.println( _stepperIx );
