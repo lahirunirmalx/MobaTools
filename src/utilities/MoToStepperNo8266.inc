@@ -11,6 +11,10 @@ uint8_t spiStepperData[2]; // step pattern to be output on SPI
                             // high nibble of spiStepperData[1] is SPI_4
                             // spiStepperData[1] is shifted out first
 
+// coil pattern for 4-pin steppers ( half step sequence, FULLSTEP uses every 2nd entry )
+// used in the ISR and in setMotorEnable() ( MoToStepper.cpp )
+static const int DRAM_ATTR stepPattern[8] = {0b0011, 0b0010, 0b0110, 0b0100, 0b1100, 0b1000, 0b1001,0b0001 };
+
 bool IRAM_ATTR setStepperPins( stepperData_t *stepperDataP, uint8_t stepPattern ) {
 	// setting 4-pin stepperdata to enable/disable the stepper
 	//SET_TP2;
@@ -59,7 +63,6 @@ bool IRAM_ATTR setStepperPins( stepperData_t *stepperDataP, uint8_t stepPattern 
 #pragma GCC optimize "O3"   // optimize ISR for speed
 void IRAM_ATTR stepperISR(nextCycle_t cyclesLastIRQ) {
     SET_TP2;
-    static const int DRAM_ATTR stepPattern[8] = {0b0011, 0b0010, 0b0110, 0b0100, 0b1100, 0b1000, 0b1001,0b0001 };
     stepperData_t *stepperDataP;         // actual stepper data in IRQ
 	stepperSyncData_t *locSyncDataP;	 // Data for synchronous move ( =NULL if no sync move active )
     uint8_t spiChanged, changedPins, bitNr;

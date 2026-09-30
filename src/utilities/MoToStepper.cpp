@@ -63,6 +63,23 @@ byte MoToStepper::_stepperCount = 0;
 #include "utilities/MoToStepperNo8266.inc"
 #endif // esp8266 <-> other
 
+// switch the motor driver on or off.
+// With an enable pin this is done via that pin. 4-pin steppers without an enable pin
+// ( attachEnable( delay ) ) are switched by setting or clearing the coil outputs.
+static void setMotorEnable( stepperData_t *dataP, bool on ) {
+    #ifndef ESP8266 // there are no 4-pin steppers ( and no NO_ENABLEPIN ) on ESP8266
+    if ( dataP->enablePin == NO_ENABLEPIN ) {
+        // no enable pin: restore the last coil pattern or switch all coils off
+        _noStepIRQ();
+        bool spiChanged = setStepperPins( dataP, on ? stepPattern[ dataP->patternIx ] : 0 );
+        if ( spiInitialized && spiChanged ) startSpiWriteAS( spiStepperData );
+        _stepIRQ();
+        return;
+    }
+    #endif
+    digitalWrite( dataP->enablePin, on ? dataP->enable : !dataP->enable );
+}
+
 // constructor -------------------------
 MoToStepper::MoToStepper(long steps ) {
     // constuctor for stepper Class, initialize data
@@ -405,12 +422,12 @@ bool MoToStepper::autoEnable( bool state ) { //#################################
 			// autoEnable is active, so switch motor off if it is not running
 			if ( !_chkRunning() ) {
 				// motor is not running, switch off
-				digitalWrite( _stepperData.enablePin, !_stepperData.enable ); // switch stepper off
+				setMotorEnable( &_stepperData, false );
 			}
 			
 		} else {
 			// no autoEnable, switch motor on
-			digitalWrite( _stepperData.enablePin, _stepperData.enable ); // switch stepper on
+			setMotorEnable( &_stepperData, true );
 		}
 	} else {
 		// disable ( should already be in disable state )
