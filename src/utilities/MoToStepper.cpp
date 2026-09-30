@@ -816,6 +816,7 @@ long MoToStepper::readSteps()
 long MoToStepper::stepsToDo() { //###############################################################################
     // return remaining steps until target position
     long tmp;
+    if ( _stepperData.output == NO_OUTPUT ) return 0; // not attached
     _noStepIRQ(); // disable Stepper interrupt, because (long)stepcnt is changed in TCR interrupt
     tmp = _stepperData.stepCnt + _stepperData.stepCnt2;
     _stepIRQ();  // enable stepper IRQ
