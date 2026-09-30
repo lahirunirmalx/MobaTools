@@ -130,22 +130,18 @@ static inline __attribute__((__always_inline__)) void initSpiAS(uint8_t ss=SS, u
 		spiAttachMOSI(spiHs, mosi);
 		spiAttachSS(spiHs, 0, ss);
 		spiSSEnable(spiHs);
+		spiInitialized = true;  // only if the bus could be started ( ISR checks this flag )
 	}
-	spiInitialized = true;  
 }
 
 static inline __attribute__((__always_inline__)) void startSpiWriteAS( uint8_t spiData[] ) {
    SET_TP2;
    // All this SPI-Transfers are blocking!!
-   // this is the one with the least overhead, it does not set/unset SPI_MUTEX and it does
-   // not swap bytes according to bitorder (SPI HW must be exclusive to MoToStepper
-   //spiWriteShortNL(spiHs, (spiData[1]<<8) + spiData[0] ); 
-	// -------------------------------------------------
-	// With SPI_MUTEX, but only writing, no receiving of data
-   spiWriteWord(spiHs, (spiData[1]<<8) + spiData[0] );
-	// -------------------------------------------------
-	// With SPI_MUTEX, writing, and receiving of data ( not needed here)
-   //spiTransferWord(spiHs, (spiData[1]<<8) + spiData[0] );
+   // This is called from the stepper ISR, so the variant without the core's SPI mutex must be
+   // used: spiWriteWord() takes a FreeRTOS semaphore, which is not allowed in an ISR.
+   // spiWriteShortNL() swaps the bytes for MSB-first exactly like spiWriteWord(), so the byte
+   // order on the bus is unchanged. The SPI HW must be exclusive to MoToStepper.
+   spiWriteShortNL(spiHs, (spiData[1]<<8) + spiData[0] );
    CLR_TP2;
 }    
 
