@@ -541,7 +541,7 @@ void MoToStepper::_doSteps( long stepValue, bool absPos ) {
                 if ( absPos ) stepCnt -= abs( _stepperData.stepsFromZero-lastSFZ );
                 if ( _stepperData.rampState == rampStat::SPEEDDECEL ) {
                     // we are already reducing speed, compute nbr of steps to stop
-                    uint16_t stepsToStop = _stepperData.stepRampLen + (_stepperData.stepsInRamp-_stepperData.stepRampLen)/_stepperData.deltaSteps;
+                    uintxx_t stepsToStop = _stepperData.stepRampLen + (_stepperData.stepsInRamp-_stepperData.stepRampLen)/_stepperData.deltaSteps;
                     if ( stepCnt < stepsToStop  ) {
                         // cannot reach target -> still reducing speed, than ramp, than reverse
                         _stepperData.stepCnt = stepsToStop;
